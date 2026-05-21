@@ -29,18 +29,18 @@ O ecossistema é totalmente conteinerizado, isolando a camada de controle de ace
 
 ---
 
-## 3. Componentes do Sistema
+## 3. Componentes e Tecnologias Utilizadas
 
-O sistema é dividido nos seguintes módulos independentes:
+Para garantir o desacoplamento, a escalabilidade e o melhor uso de cada ecossistema (Java para segurança e Python para IA), o sistema foi dividido nos seguintes módulos tecnológicos:
 
-* **Frontend (React):** Interface SPA (Single Page Application) responsável por coletar as preferências do usuário através de formulários interativos, renderizar o catálogo de recomendações com comparativos de preços e coletar feedbacks textuais e numéricos pós-indicação.
-* **API Gateway (FastAPI):** Ponto de entrada único para o Frontend. É responsável por interceptar todas as requisições, validar a autenticidade dos tokens de acesso e rotear as chamadas para seus respectivos microsserviços de destino.
-* **Módulo de Login & Autenticação (Spring Boot):** Serviço crítico de segurança isolado. Responsável por autenticar as credenciais do usuário, gerenciar a segurança criptográfica e emitir tokens JWT (JSON Web Tokens) assinados.
-* **Módulo CRUD de Usuários (Spring Boot):** Gerencia os dados cadastrais, informações de perfil e configurações de conta do usuário.
-* **Banco de Dados Relacional (PostgreSQL):** Instância dedicada para os serviços Spring Boot, garantindo a consistência e integridade das tabelas de usuários, credenciais, jogos e relacionamentos transacionais.
-* **Módulo de Inteligência Artificial (Ollama + LangChain):** O núcleo cognitivo do sistema. Orquestra a lógica de recomendação recebendo a requisição do Gateway, consultando a memória semântica e acionando as ferramentas necessárias para construir o prompt final.
-* **Banco de Dados Vetorial (RAG):** Armazena os embeddings de jogos buscados pela API RAWG.
-* **Servidor MCP (Python SDK):** Atua como o provedor de ferramentas para a IA. Ele expõe funções padronizadas para  comparar preços em tempo real através da API CheapShark.
+* **Frontend (React com TypeScript):** Interface SPA (Single Page Application) responsável por coletar as preferências do usuário, renderizar o catálogo de recomendações e coletar feedbacks. O React foi escolhido por sua reatividade e ecossistema robusto na construção de formulários interativos.
+* **API Gateway (FastAPI - Python):** Ponto de entrada único para o Frontend que intercepta requisições, valida tokens e roteia as chamadas. Escolhido pela sua altíssima performance, tipagem nativa com Pydantic e facilidade na criação de middlewares de roteamento rápidos.
+* **Módulos de Autenticação e CRUD (Spring Boot - Java 17+):** Serviços críticos isolados que gerenciam dados cadastrais, emitem tokens JWT e controlam acessos. O Spring Boot foi escolhido pela maturidade corporativa, segurança nativa (Spring Security) e robustez na persistência de dados.
+* **Banco de Dados Relacional (PostgreSQL):** Instância dedicada para os microsserviços em Spring. Como líder em código aberto para persistência ACID, garante integridade absoluta para as tabelas de usuários, credenciais e relacionamentos.
+* **Módulo de Inteligência Artificial (LangChain + Ollama):** O núcleo cognitivo do sistema. O **LangChain** atua como o framework orquestrador para gerenciar os prompts e conectar a IA aos dados externos. O **Ollama** atua como o motor, permitindo a execução local de modelos de linguagem (LLMs) em contêineres Docker, o que garante privacidade e custo zero por token.
+* **Memória Semântica / RAG (Banco de Dados Vetorial):** Responsável por armazenar os embeddings (representações vetoriais) dos jogos indexados, permitindo que a IA faça buscas de similaridade para entender características subjetivas solicitadas pelo usuário.
+* **Servidor de Integração (Protocolo MCP via Python SDK):** Atua como o provedor de dados vivos para a IA. Utilizando o Model Context Protocol, expõe funções padronizadas para que o modelo possa comparar preços em tempo real através da API externa CheapShark.
+* **Infraestrutura e Orquestração (Docker & Docker Compose):** Todo o ecossistema é conteinerizado. Isso permite que módulos e serviços complexos (PostgreSQL, Ollama, Spring, FastAPI) sejam empacotados, isolados e inicializados simultaneamente de forma simples.
 
 ---
 
@@ -54,16 +54,3 @@ O ciclo de vida de uma requisição de recomendação segue o fluxo abaixo:
 4.  **Consulta de Ferramentas (MCP):** Com os jogos buscados, o framework `LangChain` percebe a necessidade de dados dinâmicos de mercado e aciona o `Servidor MCP`. O MCP faz chamadas externas para as API CheapShark buscando informações atuais dos jogos.
 5.  **Geração da Resposta:** O `LangChain` injeta o contexto do RAG e os dados vivos do MCP dentro de um prompt estruturado e o envia para o modelo de linguagem local rodando no `Ollama`. O modelo processa e gera uma recomendação textual altamente personalizada e humanizada.
 6.  **Exibição e Feedback Loop:** A resposta retorna pelo Gateway até o Frontend. O usuário pode interagir com o resultado dando feedback sobre os jogos recomendados.
-
----
-
-## 5. Tecnologias Utilizadas
-
-* **Frontend:** React (TypeScript) - Escolhido pela reatividade e ecossistema robusto para gerenciamento de estados de formulários e componentes visuais.
-* **API Gateway:** FastAPI (Python) - Escolhido pela sua altíssima performance, tipagem nativa com Pantic e facilidade de criação de middlewares de roteamento rápidos.
-* **Backend Transacional (Login e CRUDs):** Spring Boot (Java 17+) - Escolhido pela maturidade corporativa, segurança nativa (Spring Security) e isolamento robusto de processos críticos de persistência de dados.
-* **Banco de Dados Relacional:** PostgreSQL - Líder em código aberto para persistência ACID, garantindo integridade absoluta para tabelas de usuários e relacionamentos estruturados.
-* **Orquestração de IA:** LangChain (Python) - Framework padrão de mercado para criar pipelines complexos de IA, gerenciar prompts e conectar agentes a ferramentas e memórias externas.
-* **Motor de LLM:** Ollama - Permite a execução local de modelos de linguagem avançados (como LLaMA 3 ou Mistral) em contêineres Docker, garantindo privacidade de dados e custo zero por token em ambiente de desenvolvimento.
-* **Integração de Contexto:** Protocolo MCP (Model Context Protocol) via Python SDK - Tecnologia de vanguarda que padroniza a injeção de contexto e chamadas de ferramentas (*tool calling*) para LLMs, eliminando acoplamentos rígidos no código de IA.
-* **Infraestrutura e Orquestração:** Docker & Docker Compose - Utilizados para empacotar cada módulo em ambientes isolados, permitindo que ferramentas complexas (como o PostgreSQL, o Ollama e os microsserviços Spring/FastAPI) sejam baixadas, configuradas e inicializadas de forma integrada com um único comando.
