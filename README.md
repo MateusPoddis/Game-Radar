@@ -6,15 +6,22 @@ Este projeto consiste em um sistema distribuído de recomendação personalizada
 
 ## 1. Problema Escolhido
 
-Sistemas de recomendação tradicionais de e-commerce e plataformas de jogos frequentemente sofrem com duas limitações principais:
-1. **Rigidez Algorítmica:** Filtros baseados puramente em tags estruturadas (ex: "Ação", "RPG") falham em capturar nuances subjetivas expressas pelos usuários (ex: *"Quero um jogo com uma atmosfera melancólica, foco em narrativa e mecânicas de plantio que não seja excessivamente punitivo"*).
-2. **Isolamento de Modelos de IA:** Modelos de Linguagem (LLMs) possuem conhecimento estático limitado à sua data de treinamento. Eles não conseguem consultar preços em tempo real, verificar promoções ativas em múltiplas lojas ou saber se o usuário já possui o jogo em sua biblioteca.
+O cenário atual de consumo de jogos eletrônicos é fortemente impactado pelo **Paradoxo da Escolha**. Com a popularização de serviços de assinatura de streaming de jogos, como *Xbox Game Pass* e *PlayStation Plus*, os jogadores passaram a ter acesso instantâneo a catálogos massivos e quase ilimitados. 
 
-**A Solução:** Este sistema resolve o problema unindo bancos de dados relacionais (para dados cadastrais e estruturados), um banco vetorial (RAG) para armazenar informações sobre jogos, e um ecossistema MCP para atuar como os braços e olhos da IA no mundo real, consultando preços ao vivo.
+No entanto, essa abundância gerou um efeito colateral conhecido como "paralisia de análise": diante de centenas de opções, o usuário frequentemente trava, gasta mais tempo navegando nos menus do que efetivamente jogando e, muitas vezes, não escolhe nada. Quando escolhem, a falta de alinhamento real com seu momento ou preferência faz com que a taxa de abandono de jogos pela metade seja altíssima.
+
+Nesse contexto de sobrecarga de informações, os sistemas de recomendação tradicionais falham em auxiliar o jogador devido a duas limitações principais:
+
+1. **Rigidez Algorítmica:** Filtros baseados puramente em tags estruturadas (ex: "Ação", "RPG") não capturam nuances subjetivas. Um jogador não quer apenas um "RPG de ação", ele quer *“um jogo com atmosfera melancólica, foco em narrativa e que não seja punitivo para jogar depois de um dia cansativo de trabalho”*.
+2. **Isolamento de Modelos de IA:** Modelos de Linguagem (LLMs) tradicionais possuem conhecimento estático limitado à sua data de treinamento. Eles não conseguem consultar em tempo real se um jogo está em promoção na Steam, se entrou no catálogo do Game Pass hoje ou comparar preços dinâmicos no mercado.
+
+**A Solução:** Este sistema resolve a paralisia da escolha unindo o melhor dos mundos. Ele utiliza bancos de dados relacionais (para dados cadastrais), um banco vetorial RAG (para entender a fundo as características subjetivas dos jogos) e um ecossistema MCP para atuar como os "braços e olhos" da IA no mundo real. Dessa forma, o sistema não apenas recomenda o jogo perfeito para o humor atual do usuário, mas já informa onde ele está mais barato ou disponível, quebrando a barreira da indecisão.
 
 ---
 
 ## 2. Arquitetura Proposta
+
+![Diagrama da Arquitetura Game-Radar](diagramas/Arquitetura_Game-Radar.png)
 
 A arquitetura adota o padrão de microsserviços distribuídos, garantindo o desacoplamento das responsabilidades, facilidade de manutenção e escalabilidade independente de cada componente. 
 
