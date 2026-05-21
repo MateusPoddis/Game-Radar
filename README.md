@@ -1,4 +1,4 @@
-# Sistema Distribuído de Recomendação de Jogos (RAG + MCP)
+# Game-Radar
 
 Este projeto consiste em um sistema distribuído de recomendação personalizada de jogos eletrônicos. A arquitetura foi desenhada sob o paradigma de microsserviços para unir o poder de modelos de linguagem de código aberto (LLMs), recuperação de contexto semântico via RAG (Retrieval-Augmented Generation) e integração dinâmica com APIs de mercado através do protocolo MCP (Model Context Protocol).
 
