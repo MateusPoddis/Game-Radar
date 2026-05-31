@@ -1,0 +1,79 @@
+.formulario-container {
+  padding: 20px;
+  max-width: 500px;
+}
+
+.formulario-titulo {
+  margin-bottom: 20px;
+}
+
+.campo-filtro {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.label-filtro {
+  display: block;
+  font-weight: bold;
+  text-transform: capitalize;
+  margin-bottom: 5px;
+}
+
+.tags-container {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.tag-item {
+  background: #e0e0e0;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+}
+
+.btn-remover-tag {
+  margin-left: 5px;
+  color: red;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.input-filtro {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box; /* Garante que o padding não quebre a largura */
+}
+
+.input-faixa {
+  display: flex;
+  gap: 10px;
+}
+
+.entre-faixa {
+  align-self: "center";
+  font-weight: "bold";
+}
+
+.btn-submit {
+  padding: 10px 20px;
+  background: #28a745;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  width: 100%;
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.btn-submit:hover {
+  background: #218838;
+}
