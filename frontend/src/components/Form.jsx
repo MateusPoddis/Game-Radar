@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Form.css"; // Importando o CSS!
 
 export default function Form() {
+  const navigate = useNavigate();
+
   const opcoesFiltros = {
     generos: [
       "FPS",
@@ -102,8 +105,14 @@ export default function Form() {
     "Preciso desvendar enigmas para avançar a próxima fase",
   ];
 
-  const indice = Math.floor(Math.random() * descricoes.length);
-  const descricaoAleatoria = descricoes[indice];
+  
+  const obterDescricaoAleatoria = (() => {
+    const indice = Math.floor(Math.random() * descricoes.length);
+    descricoes[indice];
+  }); 
+
+
+  const [placeholderDesc] = useState(() => obterDescricaoAleatoria());
 
   const [faixas, setFaixas] = useState({
     precoMin: "",
@@ -120,6 +129,11 @@ export default function Form() {
     });
   };
 
+  {
+    /* Captura a descricao */
+  }
+  const [descricao, setDescricao] = useState("");
+
   const lidarComEnvio = (e) => {
     e.preventDefault();
     if (
@@ -133,7 +147,7 @@ export default function Form() {
     }
 
     const dadosEnvio = {
-      tags: opcoesSelecionadas,
+      tags: opcoesSelecionadas || {},
       faixa: {
         preco: {
           min: faixas.precoMin ? Number(faixas.precoMin) : 0,
@@ -141,14 +155,14 @@ export default function Form() {
         },
         ano: {
           min: faixas.anoLancamentoMin ? Number(faixas.anoLancamentoMin) : 1980,
-          max: faixas.anoLancamentoMax
-            ? Number(faixas.anoLancamentoMax)
-            : new Date().getFullYear,
+          max: faixas.anoLancamentoMax ? Number(faixas.anoLancamentoMax) : new Date().getFullYear,
         },
-      },
+      } || {},
+      descricaoLivre: descricao || "",
     };
 
     console.log("Dados prontos para a API:", dadosEnvio);
+    navigate("/chat", { state: { filtrosIniciais: dadosEnvio } });
   };
 
   return (
@@ -260,8 +274,10 @@ export default function Form() {
 
         <input
           type="text"
-          placeholder={`Ex: ${descricaoAleatoria}`}
+          placeholder={`Ex: ${placeholderDesc}`}
           className="input-filtro"
+          value={descricao}
+          onChange={(e) => setDescricao(e.target.value)}
         />
       </div>
 
