@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Form.css"; // Importando o CSS!
+import "./Form.css";
 
 export default function Form() {
   const navigate = useNavigate();
@@ -108,7 +108,7 @@ export default function Form() {
   
   const obterDescricaoAleatoria = (() => {
     const indice = Math.floor(Math.random() * descricoes.length);
-    descricoes[indice];
+    return descricoes[indice];
   }); 
 
 
@@ -155,9 +155,9 @@ export default function Form() {
         },
         ano: {
           min: faixas.anoLancamentoMin ? Number(faixas.anoLancamentoMin) : 1980,
-          max: faixas.anoLancamentoMax ? Number(faixas.anoLancamentoMax) : new Date().getFullYear,
+          max: faixas.anoLancamentoMax ? Number(faixas.anoLancamentoMax) : new Date().getFullYear(),
         },
-      } || {},
+      },
       descricaoLivre: descricao || "",
     };
 
@@ -257,7 +257,6 @@ export default function Form() {
           <input
             type="number"
             min="1980"
-            max="2026"
             placeholder="Mínimo (ex: 2020)"
             className="input-filtro"
             value={faixas.anoLancamentoMax}

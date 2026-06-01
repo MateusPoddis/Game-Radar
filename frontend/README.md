@@ -1,16 +1,45 @@
-# React + Vite
+# Game-Radar - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este é o módulo de interface de usuário (Frontend) do sistema de recomendação de jogos Game-Radar. Desenvolvido em React + Vite.
 
-Currently, two official plugins are available:
+## 🛠️ Pré-requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+* Docker
 
-## React Compiler
+##  Como Iniciar
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Clone o repositório e acesse a pasta do frontend:
+```bash
+git clone https://github.com/MateusPoddis/Game-Radar.git
+cd Game-Radar/frontend
+```
 
-## Expanding the ESLint configuration
+2. Construa a imagem e inicie o container
+```bash
+docker-compose up --build
+```
+ou
+```bash
+docker compose up --build
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+3. Baixe as dependências
+```bash
+docker exec -it frontend npm install react-router-dom
+```
+
+4. Acesse a aplicação em [http://localhost:5173](http://localhost:5173)
+
+Novas dependências são baixadas com:
+```bash
+docker exec -it frontend npm install <nome-do-pacote>
+```
+
+Pare a aplicação com:
+```bash
+docker-compose down
+```
+ou
+```bash
+docker compose down
+```

@@ -1,0 +1,60 @@
+/* Container principal do chat ocupando a tela toda */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-width: 1200px; /* <-- Aumentado de 800px para 1200px */
+  width: 100%;       /* Garante que ele ocupe todo o espaço até chegar no limite */
+  margin: 0 auto;
+  background-color: var(--bg);
+}
+
+/* Área onde as mensagens ficam (com scroll) */
+.chat-mensagens {
+  flex-grow: 1; /* Faz essa área crescer e ocupar todo o espaço restante */
+  overflow-y: auto; /* Cria a barra de rolagem apenas aqui! */
+  padding: 20px;
+}
+
+/* Área do formulário fixada na parte inferior pelo Flexbox */
+.chat-input-area {
+  display: flex;
+  gap: 10px;
+  padding: 20px;
+  background-color: var(--bg);
+  
+  /* Borda suave no topo para separar as mensagens do campo de digitação */
+  border-top: 1px solid rgba(0, 0, 0, 0.05); 
+}
+
+/* O campo de texto */
+.input {
+  flex-grow: 1; /* Faz o input esticar até onde der */
+  padding: 15px;
+  border-radius: 25px; /* Bordas bem arredondadas (suaves) */
+  border: 1px solid rgba(0, 0, 0, 0.1); /* Borda muito clarinha */
+  background-color: #f4f3ec; /* Cor leve para contraste */
+  outline: none; /* Tira aquela linha preta forte quando clica */
+  font-size: 16px;
+}
+
+.input:focus {
+  border-color: #28a745; /* Fica verde apenas quando você clica para digitar */
+}
+
+/* O botão de envio */
+.submit {
+  background-color: #28a745;
+  color: white;
+  border-radius: 25px;
+  border: none; /* Sem borda nenhuma */
+  padding: 0 25px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  transition: opacity 0.2s; /* Animação suave ao passar o mouse */
+}
+
+.submit:hover {
+  opacity: 0.8;
+}

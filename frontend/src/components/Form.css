@@ -1,6 +1,16 @@
+/* Container principal do formulário */
 .formulario-container {
-  padding: 20px;
-  max-width: 500px;
+  padding: 40px; /* Mais respiro interno */
+  max-width: 1000px; /* <-- Expandido de 500px para 1000px */
+  width: 100%;
+  margin: 40px auto; /* Centraliza na tela e dá espaço no topo/base */
+  box-sizing: border-box;
+
+  /* Estética de "cartão" com sombra super suave */
+  background-color: var(--bg);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); 
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .formulario-titulo {
@@ -45,15 +55,28 @@
   font-weight: bold;
 }
 
+/* Arredondando os inputs do formulário para combinar com o chat */
 .input-filtro {
   width: 100%;
-  padding: 8px;
-  box-sizing: border-box; /* Garante que o padding não quebre a largura */
+  padding: 12px 15px;
+  border-radius: 15px; /* Bordas suaves */
+  border: 1px solid rgba(0, 0, 0, 0.1); /* Linha quase invisível */
+  background-color: #f4f3ec;
+  box-sizing: border-box;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
 }
 
+/* Fica verde ao clicar para digitar, igual ao chat */
+.input-filtro:focus {
+  border-color: #28a745;
+}
+
+/* Ajuste para fazer os campos de "Mínimo e Máximo" esticarem por igual */
 .input-faixa {
   display: flex;
-  gap: 10px;
+  flex-grow: 1; 
 }
 
 .entre-faixa {

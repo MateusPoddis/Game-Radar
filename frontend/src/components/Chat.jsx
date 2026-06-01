@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import "./Chat.css"
 
 export default function Chat() {
   const location = useLocation();
@@ -41,19 +42,11 @@ export default function Chat() {
   };
 
   return (
-    <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
-      <h2>Chat de Recomendação</h2>
-
+    <div className="chat-container">
       {/* Caixa de mensagens */}
-      <div
-        style={{
-          height: "400px",
-          border: "1px solid #ccc",
-          overflowY: "auto",
-          padding: "10px",
-          marginBottom: "10px",
-        }}
-      >
+      <div className="chat-mensagens">
+        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Chat de Recomendação</h2>
+        
         {mensagens.map((msg, index) => (
           <div
             key={index}
@@ -64,12 +57,13 @@ export default function Chat() {
           >
             <span
               style={{
-                background: msg.remetente === "usuario" ? "#007bff" : "#e9ecef",
+                background: msg.remetente === "usuario" ? "#28a745" : "#f4f3ec",
                 color: msg.remetente === "usuario" ? "white" : "black",
-                padding: "8px 12px",
-                borderRadius: "15px",
+                padding: "12px 18px",
+                borderRadius: "20px", // Balões de conversa suaves
                 display: "inline-block",
                 maxWidth: "80%",
+                boxShadow: "0 2px 5px rgba(0,0,0,0.05)", // Uma sombra quase invisível
               }}
             >
               {msg.texto}
@@ -78,16 +72,16 @@ export default function Chat() {
         ))}
       </div>
 
-      {/* Input de digitação */}
-      <form onSubmit={enviarMensagem} style={{ display: "flex", gap: "10px" }}>
+      {/* Input de digitação na base */}
+      <form onSubmit={enviarMensagem} className="chat-input-area">
         <input
           type="text"
           value={inputUsuario}
           onChange={(e) => setInputUsuario(e.target.value)}
           placeholder="Diga o que achou da recomendação..."
-          style={{ flex: 1, padding: "10px" }}
+          className="input"
         />
-        <button type="submit" style={{ padding: "10px 20px" }}>
+        <button type="submit" className="submit">
           Enviar
         </button>
       </form>
