@@ -21,7 +21,7 @@ export default function Chat() {
         texto: "Recebi seus filtros! Buscando jogos para recomendar ...",
       };
       setMensagens([mensagemInicial]);
-
+      
       // AQUI entrará a sua chamada (fetch/axios) para o FastAPI!
       // Você enviará os filtros e receberá a recomendação do Ollama.
     }

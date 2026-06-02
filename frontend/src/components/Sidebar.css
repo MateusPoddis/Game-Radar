@@ -1,0 +1,36 @@
+.sidebar-container {
+  width: 260px; /* Largura fixa da barra lateral */
+  background-color: var(--code-bg); /* Usa uma cor leve do seu tema */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px; /* Espaço entre a logo e o botão */
+  border-right: 1px solid rgba(0, 0, 0, 0.05); /* Borda suave na direita */
+  height: 100vh; /* Ocupa a altura toda da tela */
+  box-sizing: border-box;
+}
+
+.sidebar-logo {
+  width: 80%; /* A imagem vai se adaptar ao tamanho da sidebar */
+  border-radius: 10px;
+}
+
+.btn-novo-chat {
+  width: 100%;
+  padding: 12px;
+  background-color: transparent;
+  border: 1px solid #28a745;
+  color: #28a745;
+  border-radius: 15px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+/* Efeito invertido ao passar o mouse */
+.btn-novo-chat:hover {
+  background-color: #28a745;
+  color: white;
+}
