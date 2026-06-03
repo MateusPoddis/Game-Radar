@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # 1. O container do Ollama (Gerenciador local do LLM)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - gamedar-network
+
+  # 2. O Servidor MCP
+  mcp-gateway:
+    build: ./mcp_server
+    container_name: mcp-gateway
+    ports:
+      - "8000:8000"
+    networks:
+      - gamedar-network
+
+  # 3. Microsserviço de IA (LangChain + FastAPI)
+  ia-service:
+    build: ./ia_service
+    container_name: ia-service
+    ports:
+      - "8002:8002"
+    environment:
+      # Aponta para o nome do container do Ollama na rede interna
+      - OLLAMA_BASE_URL=http://ollama:11434
+    depends_on:
+      - ollama
+      - mcp-gateway
+    networks:
+      - gamedar-network
+
+  # 4. API Gateway (Ponte com o Frontend)
+  api-gateway:
+    build: ./gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      # Aponta para o nome do container da IA na rede interna
+      - IA_SERVICE_URL=http://ia-service:8002
+    depends_on:
+      - ia-service
+    networks:
+      - gamedar-network
+
+networks:
+  gamedar-network:
+    driver: bridge
+
+volumes:
+  ollama_data:
