@@ -55,7 +55,6 @@ async def query_postgres_metrics(service_name: str) -> str:
     # Aqui entraria a lógica de consulta (usando psycopg2, asyncpg ou SQLAlchemy)
     return f"Métricas do PostgreSQL para '{service_name}': 12 conexões ativas, tempo médio de query 45ms."
 
-# 3. Inicialização
+
 if __name__ == "__main__":
-    # O FastMCP padroniza a comunicação via stdio (entrada e saída padrão) automaticamente
-    mcp.run()
+    mcp.run(transport="sse", host="0.0.0.0", port=8000)
