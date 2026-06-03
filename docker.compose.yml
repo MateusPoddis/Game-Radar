@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  app:
+    build: 
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - "0.0.0.0:5173:5173"
+    volumes:
+      - ./frontend:/app  # <-- Corrigido o ./ aqui
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+  gateway:
+    build: 
+      context: ./game-radar-gateway
+    container_name: gateway
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./game-radar-gateway:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      
+  modulo-ia:
+    build: 
+      context: ./modulo_ia
+    container_name: orquestrador
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./modulo_ia:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - ollama
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: game_radar_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+# Declaração dos volumes persistentes
+volumes:
+  ollama_data:
