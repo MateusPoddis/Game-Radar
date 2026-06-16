@@ -2,8 +2,8 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, List
 from langchain_community.chat_models import ChatOllama
-from langchain.agents import tool, AgentExecutor, create_tool_calling_agent
-from langchain_core.prompts import ChatPromptTemplate
+from langchain.agents import tool, AgentExecutor, create_react_agent
+from langchain.prompts import PromptTemplate
 
 # Importações essenciais do Cliente MCP
 from mcp import ClientSession
@@ -34,28 +34,20 @@ app = FastAPI(title="Orquestrador Game-Radar - Gemma 2")
 def buscar_jogos_banco_local(descricao: str) -> str:
     """Use esta ferramenta PRIMEIRO para buscar jogos no banco de dados local com base na descrição, história ou características solicitadas pelo usuário."""
     print(f"🔧 [Tool Executada] RAG: Buscando por '{descricao}'")
-    return "Encontrei 'The Witcher 3' e 'Stardew Valley' no banco de dados que combinam com a descrição."
+    return "Resultados do banco de dados: 'Fortnite' (Battle Royale ágil com construção), 'Albion Online' (MMORPG focado em economia) e 'The Witcher 3' (Mundo aberto com excelente história)."
 
-# Transformamos a tool em assíncrona para não travar o FastAPI
 @tool
 async def consultar_mcp_externo(nome_jogo: str) -> str:
     """Use esta ferramenta APENAS para buscar dados ao vivo em APIs externas, como o preço atualizado de um jogo específico na Steam."""
     print(f"🔧 [Tool Executada] MCP: Consultando dados vivos de '{nome_jogo}'")
     
-    # URL do container MCP (ajuste 'mcp-gateway' para o nome do container no seu Docker/rede)
     url_mcp = "http://mcp-gateway:8000/sse" 
     
     try:
-        # Conecta ao servidor MCP via rede
         async with sse_client(url_mcp) as streams:
             async with ClientSession(streams[0], streams[1]) as session:
                 await session.initialize()
-                
-                # Chama a ferramenta que configuramos lá no server.py
-                # Substitua "check_services_health" pelo nome exato do @mcp.tool() que deseja usar
                 resultado = await session.call_tool("check_services_health", {})
-                
-                # Retorna o texto extraído para o Gemma 2 interpretar
                 return resultado.content[0].text
                 
     except Exception as e:
@@ -64,18 +56,47 @@ async def consultar_mcp_externo(nome_jogo: str) -> str:
 ferramentas = [buscar_jogos_banco_local, consultar_mcp_externo]
 
 # ==========================================
-# 3. CONFIGURAÇÃO DO LLM E DO AGENTE
+# 3. CONFIGURAÇÃO DO LLM E DO AGENTE (ReAct)
 # ==========================================
-llm = ChatOllama(model="gemma2", base_url="http://ollama:11434")
+llm = ChatOllama(model="gemma2", base_url="http://127.0.0.1:11434")
 
-prompt_agente = ChatPromptTemplate.from_messages([
-    ("system", "Você é o Game-Radar, um assistente especializado em recomendar jogos. Use as ferramentas disponíveis para buscar informações antes de responder."),
-    ("human", "{input}"),
-    ("placeholder", "{agent_scratchpad}"),
-])
+# Deixei as regras mais rígidas para evitar que o Gemma 2 fique em loop
+template_react = '''Responda a solicitação do usuário da melhor forma possível. Você é o Game-Radar, um assistente especializado em recomendar jogos.
+Você tem acesso às seguintes ferramentas:
 
-agente = create_tool_calling_agent(llm, ferramentas, prompt_agente)
-executor_agente = AgentExecutor(agent=agente, tools=ferramentas, verbose=True)
+{tools}
+
+REGRAS IMPORTANTES:
+1. Se a ferramenta 'buscar_jogos_banco_local' retornar jogos, NÃO use a ferramenta novamente para refinar a busca. Use os jogos que ela já retornou.
+2. Analise os resultados e, na próxima etapa, forneça a Final Answer imediatamente.
+
+Use o seguinte formato rigorosamente:
+
+Question: a pergunta que você deve responder
+Thought: você deve sempre pensar sobre o que fazer a seguir
+Action: a ação a tomar, deve ser EXATAMENTE UMA das ferramentas: [{tool_names}]
+Action Input: a entrada de dados para a ação
+Observation: o resultado da ação
+... (este ciclo Thought/Action/Action Input/Observation pode se repetir N vezes)
+Thought: Eu agora sei a resposta final
+Final Answer: a resposta final e amigável para o usuário
+
+Comece!
+
+Question: {input}
+Thought:{agent_scratchpad}'''
+
+prompt_agente = PromptTemplate.from_template(template_react)
+
+agente = create_react_agent(llm, ferramentas, prompt_agente)
+executor_agente = AgentExecutor(
+    agent=agente, 
+    tools=ferramentas, 
+    verbose=True, 
+    handle_parsing_errors="Tente novamente com o formato correto, ou retorne Final Answer imediatamente.",
+    max_iterations=4, # Aumentei de 2 para 4 para não dar Timeout
+    early_stopping_method="force" 
+)
 
 # ==========================================
 # 4. ROTA PRINCIPAL DA API
@@ -85,10 +106,12 @@ async def orquestrar_chat(req: RequisicaoRecomendacao):
     try:
         print("\n--- Iniciando Raciocínio do Gemma 2 ---")
         
-        pergunta_completa = f"O usuário pediu: {req.descricaoLivre}. Tags aplicadas: {req.tags}"
+        tags_limpas = [f"{chave}: {', '.join(valores)}" for chave, valores in req.tags.items() if valores]
+        texto_tags = " | ".join(tags_limpas) if tags_limpas else "Nenhuma tag específica"
         
-        # MUDANÇA CRÍTICA: Usar 'ainvoke' (assíncrono) permite que o LangChain 
-        # execute nossa ferramenta consultar_mcp_externo corretamente!
+        pergunta_completa = f"Pedido do usuário: '{req.descricaoLivre}'. Filtros de busca: {texto_tags}."
+        print(f"Enviando para a IA: {pergunta_completa}")
+        
         resposta = await executor_agente.ainvoke({"input": pergunta_completa})
         
         return {

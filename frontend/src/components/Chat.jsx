@@ -34,19 +34,12 @@ export default function Chat() {
           return res.json();
         })
         .then((data) => {
-          let respostaFormatada = "Aqui estão os jogos que recomendo para você:\n\n";
-          
-          if (data.recomendacoes && data.recomendacoes.length > 0) {
-            data.recomendacoes.forEach((jogo) => {
-              respostaFormatada += `🎮 ${jogo.titulo} \n💰 Preço: ${jogo.preco_cheapshark} \n📍 Plataforma: ${jogo.plataforma}\n\n`;
-            });
-          } else {
-            respostaFormatada = "Não encontrei nenhuma recomendação para esses filtros.";
-          }
+          // CORREÇÃO: Agora o React pega o texto direto que a IA formulou no Python
+          const respostaDaIA = data.texto || "Não consegui formular uma resposta, desculpe!";
 
           setMensagens((prev) => [
             ...prev,
-            { remetente: "ia", texto: respostaFormatada },
+            { remetente: "ia", texto: respostaDaIA },
           ]);
         })
         .catch((err) => {

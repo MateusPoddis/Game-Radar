@@ -6,7 +6,7 @@ router = APIRouter()
 
 # VARIÁVEIS DE AMBIENTE
 # Apontando para o container onde roda o seu Agente LangChain (main.py)
-IA_SERVICE_URL = os.getenv("IA_SERVICE_URL", "http://127.0.0.1:8002")
+IA_SERVICE_URL = os.getenv("IA_SERVICE_URL", "http://127.0.0.1:8000")
 
 # ==========================================
 # ROTA PRINCIPAL (React -> Gateway -> IA)
@@ -19,7 +19,7 @@ async def obter_recomendacao(dados_do_front: dict):
     """
     try:
         # Usamos httpx assíncrono para não bloquear o servidor enquanto a IA raciocina
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=120.0) as client:
             # Chama a rota '/api/chat' que definimos no main.py
             response = await client.post(f"{IA_SERVICE_URL}/api/chat", json=dados_do_front)
             
