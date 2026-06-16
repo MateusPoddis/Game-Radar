@@ -242,7 +242,7 @@ def upsert_games(collection, games: list[dict]):
 # 6. FLUXO PRINCIPAL
 # ─────────────────────────────────────────────
 def main():
-    print("🚀 Iniciando ingestão de jogos para o banco vetorial RAG\n")
+    print(" Iniciando ingestão de jogos para o banco vetorial RAG\n")
 
     token      = get_twitch_token()
     collection = get_chroma_collection()
@@ -251,22 +251,22 @@ def main():
     offset = 0
 
     while total_inseridos < TOTAL_GAMES:
-        print(f"📦 Buscando lote: offset={offset}, batch={BATCH_SIZE}...")
+        print(f"Buscando lote: offset={offset}, batch={BATCH_SIZE}...")
         try:
             games = fetch_games_batch(token, offset)
         except requests.HTTPError as e:
-            print(f"❌ Erro na API da IGDB: {e}")
+            print(f"Erro na API da IGDB: {e}")
             break
 
         if not games:
-            print("ℹ️  Sem mais jogos para buscar.")
+            print(" Sem mais jogos para buscar.")
             break
 
         upsert_games(collection, games)
         total_inseridos += len(games)
         offset          += BATCH_SIZE
 
-        print(f"   ✅ {len(games)} jogos inseridos. Total: {total_inseridos}")
+        print(f"   {len(games)} jogos inseridos. Total: {total_inseridos}")
 
         # Respeita o rate limit da IGDB (4 req/s no plano gratuito)
         time.sleep(0.3)
