@@ -1,3 +1,4 @@
+import os
 import asyncio  
 import httpx
 from mcp.server.fastmcp import FastMCP
@@ -6,7 +7,9 @@ from mcp.server.fastmcp import FastMCP
 mcp = FastMCP("mcp-gateway-controller")
 
 # URL do seu API Gateway (ajuste conforme necessário)
-GATEWAY_URL = "http://localhost:8080"
+GATEWAY_URL = os.getenv("GATEWAY_URL", "http://api-gateway:8080")
+HOST = os.getenv("MCP_HOST", "0.0.0.0")
+PORT = int(os.getenv("MCP_PORT", "8000"))
 
 # 2. Definição das Ferramentas (Tools)
 
@@ -57,4 +60,4 @@ async def query_postgres_metrics(service_name: str) -> str:
 
 
 if __name__ == "__main__":
-    mcp.run(transport="sse", host="0.0.0.0", port=8000)
+    mcp.run(transport="sse", host=HOST, port=PORT)

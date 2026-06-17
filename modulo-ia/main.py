@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, List
@@ -40,16 +41,16 @@ def buscar_jogos_banco_local(descricao: str) -> str:
 async def consultar_mcp_externo(nome_jogo: str) -> str:
     """Use esta ferramenta APENAS para buscar dados ao vivo em APIs externas, como o preço atualizado de um jogo específico na Steam."""
     print(f"🔧 [Tool Executada] MCP: Consultando dados vivos de '{nome_jogo}'")
-    
-    url_mcp = "http://mcp-gateway:8000/sse" 
-    
+
+    url_mcp = os.getenv("MCP_GATEWAY_URL", "http://mcp-gateway:8000/sse")
+
     try:
         async with sse_client(url_mcp) as streams:
             async with ClientSession(streams[0], streams[1]) as session:
                 await session.initialize()
                 resultado = await session.call_tool("check_services_health", {})
                 return resultado.content[0].text
-                
+
     except Exception as e:
         return f"Aviso: Não foi possível obter os dados via MCP. Erro: {str(e)}"
 
@@ -58,7 +59,9 @@ ferramentas = [buscar_jogos_banco_local, consultar_mcp_externo]
 # ==========================================
 # 3. CONFIGURAÇÃO DO LLM E DO AGENTE (ReAct)
 # ==========================================
-llm = ChatOllama(model="gemma2", base_url="http://127.0.0.1:11434")
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma2")
+llm = ChatOllama(model=OLLAMA_MODEL, base_url=OLLAMA_BASE_URL)
 
 # Deixei as regras mais rígidas para evitar que o Gemma 2 fique em loop
 template_react = '''Responda a solicitação do usuário da melhor forma possível. Você é o Game-Radar, um assistente especializado em recomendar jogos.

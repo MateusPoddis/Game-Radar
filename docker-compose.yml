@@ -1,7 +1,5 @@
-version: '3.8'
-
 services:
-  # 1. O container do Ollama (Gerenciador local do LLM)
+  # 1. Container do Ollama (LLM local)
   ollama:
     image: ollama/ollama:latest
     container_name: ollama
@@ -12,41 +10,62 @@ services:
     networks:
       - gamedar-network
 
-  # 2. O Servidor MCP
+  # 2. Servidor MCP
   mcp-gateway:
-    build: ./mcp_server
+    build: ./modulo-ia
     container_name: mcp-gateway
+    command: python servidor_mcp.py
     ports:
       - "8000:8000"
+    environment:
+      - MCP_HOST=0.0.0.0
+      - MCP_PORT=8000
+      - GATEWAY_URL=http://api-gateway:8080
+    depends_on:
+      - ollama
     networks:
       - gamedar-network
 
   # 3. Microsserviço de IA (LangChain + FastAPI)
   ia-service:
-    build: ./ia_service
+    build: ./modulo-ia
     container_name: ia-service
+    command: uvicorn main:app --host 0.0.0.0 --port 8002
     ports:
       - "8002:8002"
     environment:
-      # Aponta para o nome do container do Ollama na rede interna
       - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=gemma2
+      - MCP_GATEWAY_URL=http://mcp-gateway:8000/sse
     depends_on:
       - ollama
       - mcp-gateway
     networks:
       - gamedar-network
 
-  # 4. API Gateway (Ponte com o Frontend)
+  # 4. API Gateway (ponte com o frontend)
   api-gateway:
     build: ./gateway
     container_name: api-gateway
     ports:
       - "8080:8080"
     environment:
-      # Aponta para o nome do container da IA na rede interna
       - IA_SERVICE_URL=http://ia-service:8002
     depends_on:
       - ia-service
+    networks:
+      - gamedar-network
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - VITE_GATEWAY_URL=http://localhost:8080
+    depends_on:
+      - api-gateway
     networks:
       - gamedar-network
 

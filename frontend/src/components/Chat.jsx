@@ -11,6 +11,8 @@ export default function Chat() {
   // Histórico da conversa no Chat
   const [mensagens, setMensagens] = useState([]);
   const [inputUsuario, setInputUsuario] = useState("");
+  const API_GATEWAY_URL =
+    import.meta.env.VITE_GATEWAY_URL || "http://localhost:8080";
 
   // 1. Efeito disparado assim que a tela abre (Envia os filtros do formulário)
   useEffect(() => {
@@ -21,16 +23,21 @@ export default function Chat() {
       };
       setMensagens([reinforcementMensagem]);
 
-      // CHAMADA PARA O API GATEWAY (Utiliza o IP local estável para Linux)
-      fetch("http://127.0.0.1:8080/api/v1/recomendacao", {
+      // CHAMADA PARA O API GATEWAY usando a URL configurada para o ambiente atual.
+      fetch(`${API_GATEWAY_URL}/api/v1/recomendacao`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(filtros),
       })
-        .then((res) => {
-          if (!res.ok) throw new Error("Erro ao falar com o Gateway");
+        .then(async (res) => {
+          if (!res.ok) {
+            const detalhe = await res.text();
+            throw new Error(
+              detalhe || "Erro ao falar com o Gateway"
+            );
+          }
           return res.json();
         })
         .then((data) => {
@@ -63,7 +70,7 @@ export default function Chat() {
     setInputUsuario("");
 
     try {
-      const res = await fetch("http://127.0.0.1:8080/api/v1/recomendacao", {
+      const res = await fetch(`${API_GATEWAY_URL}/api/v1/recomendacao`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -74,6 +81,11 @@ export default function Chat() {
           descricaoLivre: textoDigitado,
         }),
       });
+
+      if (!res.ok) {
+        const detalhe = await res.text();
+        throw new Error(detalhe || "Erro ao falar com o Gateway");
+      }
 
       const data = await res.json();
       
@@ -91,7 +103,7 @@ export default function Chat() {
     } catch (err) {
       setMensagens((prev) => [
         ...prev,
-        { remetente: "ia", texto: "Ih, me perdi na conexão com o Gateway." },
+        { remetente: "ia", texto: `Ih, me perdi na conexão com o Gateway. ${err.message}` },
       ]);
     }
   };
