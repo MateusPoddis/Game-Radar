@@ -33,7 +33,8 @@
   padding: 15px;
   border-radius: 25px; /* Bordas bem arredondadas (suaves) */
   border: 1px solid rgba(0, 0, 0, 0.1); /* Borda muito clarinha */
-  background-color: #f4f3ec; /* Cor leve para contraste */
+  background-color: var(--code-bg); /* Cor leve para contraste */
+  color: var(--text-h);
   outline: none; /* Tira aquela linha preta forte quando clica */
   font-size: 16px;
 }

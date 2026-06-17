@@ -124,8 +124,8 @@ export default function Chat() {
           >
             <span
               style={{
-                background: msg.remetente === "usuario" ? "#28a745" : "#f4f3ec",
-                color: msg.remetente === "usuario" ? "white" : "black",
+                background: msg.remetente === "usuario" ? "#28a745" : "var(--code-bg)",
+                color: msg.remetente === "usuario" ? "white" : "var(--text-h)",
                 padding: "12px 18px",
                 borderRadius: "20px",
                 display: "inline-block",

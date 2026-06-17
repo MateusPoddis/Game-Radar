@@ -38,7 +38,8 @@
 }
 
 .tag-item {
-  background: #e0e0e0;
+  background: var(--code-bg);
+  color: var(--text-h);
   padding: 4px 10px;
   border-radius: 15px;
   font-size: 13px;
@@ -59,9 +60,11 @@
 .input-filtro {
   width: 100%;
   padding: 12px 15px;
-  border-radius: 15px; /* Bordas suaves */
-  border: 1px solid rgba(0, 0, 0, 0.1); /* Linha quase invisível */
-  background-color: #f4f3ec;
+  border-radius: 15px; 
+  border: 1px solid rgba(0, 0, 0, 0.1); 
+  /* Substitua a cor fixa pelas variáveis */
+  background-color: var(--code-bg);
+  color: var(--text-h);
   box-sizing: border-box;
   font-size: 16px;
   outline: none;
