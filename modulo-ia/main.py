@@ -2,6 +2,7 @@
 main_merged.py — Orquestrador de IA (Game-Radar)
 
 Versão mesclada: RAG real (rag.py + ChromaDB) + MCP robusto com variáveis de ambiente.
+Usa create_react_agent (compatível com langchain==0.2.6 + ChatOllama).
 """
 
 import os
@@ -9,8 +10,8 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, List
 from langchain_community.chat_models import ChatOllama
-from langchain.agents import tool, AgentExecutor, create_tool_calling_agent
-from langchain_core.prompts import ChatPromptTemplate
+from langchain.agents import tool, AgentExecutor, create_react_agent
+from langchain.prompts import PromptTemplate
 
 # Importações do Cliente MCP
 from mcp import ClientSession
@@ -109,29 +110,43 @@ OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://ollama:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma2")
 llm = ChatOllama(model=OLLAMA_MODEL, base_url=OLLAMA_BASE_URL)
 
-prompt_agente = ChatPromptTemplate.from_messages([
-    (
-        "system",
-        """Você é o Game-Radar, um assistente especializado em recomendar jogos eletrônicos.
+template_react = '''Você é o Game-Radar, um assistente especializado em recomendar jogos eletrônicos.
+Você tem acesso às seguintes ferramentas:
 
-Seu fluxo de raciocínio OBRIGATÓRIO:
-1. SEMPRE use a ferramenta 'buscar_jogos_banco_local' primeiro para encontrar jogos relevantes.
-2. Para cada jogo promissor, use 'consultar_mcp_externo' para verificar preços e disponibilidade.
-3. Com base em todos os dados coletados, elabore uma recomendação personalizada e humanizada.
+{tools}
 
-Na sua resposta final:
+REGRAS IMPORTANTES:
+1. Use 'buscar_jogos_banco_local' PRIMEIRO para encontrar jogos relevantes no banco local.
+2. Se a ferramenta retornar jogos, NÃO a use novamente para refinar — use os resultados que ela já retornou.
+3. Use 'consultar_mcp_externo' para verificar preço e disponibilidade de cada jogo promissor.
+4. Após coletar os dados, vá direto para a Final Answer.
+
+Na Final Answer:
 - Recomende os 2 ou 3 jogos mais adequados ao perfil do usuário
-- Explique por que cada jogo combina com o pedido dele
-- Informe o preço atual e onde o jogo está disponível (assinaturas, plataformas)
-- Use um tom amigável e entusiasmado, como um amigo gamer dando dicas
+- Explique por que cada jogo combina com o pedido
+- Informe preço e onde está disponível (assinaturas, plataformas)
+- Use tom amigável e entusiasmado, como um amigo gamer dando dicas
 - Responda em português brasileiro
-""",
-    ),
-    ("human", "{input}"),
-    ("placeholder", "{agent_scratchpad}"),
-])
 
-agente = create_tool_calling_agent(llm, ferramentas, prompt_agente)
+Use o seguinte formato rigorosamente:
+
+Question: a pergunta que você deve responder
+Thought: você deve sempre pensar sobre o que fazer a seguir
+Action: a ação a tomar, deve ser EXATAMENTE UMA das ferramentas: [{tool_names}]
+Action Input: a entrada de dados para a ação
+Observation: o resultado da ação
+... (este ciclo Thought/Action/Action Input/Observation pode se repetir N vezes)
+Thought: Eu agora sei a resposta final
+Final Answer: a resposta final e amigável para o usuário em português brasileiro
+
+Comece!
+
+Question: {input}
+Thought:{agent_scratchpad}'''
+
+prompt_agente = PromptTemplate.from_template(template_react)
+
+agente = create_react_agent(llm, ferramentas, prompt_agente)
 executor_agente = AgentExecutor(
     agent=agente,
     tools=ferramentas,
