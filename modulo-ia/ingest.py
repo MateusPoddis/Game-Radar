@@ -191,51 +191,68 @@ def game_to_metadata(game: dict) -> dict:
     }
 
 
-# ─────────────────────────────────────────────
-# 5. GRAVAÇÃO NO CHROMADB
-# ─────────────────────────────────────────────
 def get_chroma_collection():
-    """Conecta ao ChromaDB e retorna (ou cria) a collection de jogos."""
     print(f"🗄️  Conectando ao ChromaDB em {CHROMA_HOST}:{CHROMA_PORT}...")
+
+    # Vamos garantir que o endpoint do ollama esteja correto
+    # Se o host for 'localhost' dentro do container, ele pode não achar o ollama
+    print(f"🧠 Usando Ollama em: {OLLAMA_BASE_URL}")
 
     client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
 
-    # Usa Ollama para gerar embeddings localmente (sem custo de API)
+    # Função de embedding ajustada
     embed_fn = embedding_functions.OllamaEmbeddingFunction(
         url=f"{OLLAMA_BASE_URL}/api/embeddings",
         model_name=EMBEDDING_MODEL,
     )
 
+    # Testa se o Ollama responde antes de criar a coleção
+    try:
+        test_embed = embed_fn(["teste"])
+        print(f"✅ Conexão com Ollama OK. Dimensão do embedding: {len(test_embed[0])}")
+    except Exception as e:
+        print(f"❌ Erro ao conectar no Ollama: {e}")
+        print("💡 DICA: Verifique se o container 'ollama' está rodando e se você baixou o modelo com: docker exec -it ollama ollama pull nomic-embed-text")
+        exit(1)
+
     collection = client.get_or_create_collection(
         name=COLLECTION_NAME,
         embedding_function=embed_fn,
-        metadata={"hnsw:space": "cosine"},  # distância cosseno é ideal para texto
+        metadata={"hnsw:space": "cosine"},
     )
 
-    print(f"✅ Collection '{COLLECTION_NAME}' pronta. Itens atuais: {collection.count()}")
     return collection
 
 
 def upsert_games(collection, games: list[dict]):
     """Insere ou atualiza jogos no ChromaDB (upsert evita duplicatas)."""
-    ids       = []
-    documents = []
-    metadatas = []
+    sucesso = 0
+    falhas  = 0
 
     for game in games:
         game_id = str(game["id"])
         doc     = game_to_document(game)
         meta    = game_to_metadata(game)
 
-        ids.append(game_id)
-        documents.append(doc)
-        metadatas.append(meta)
+        # Ignora documentos vazios — causam IndexError no ChromaDB/Ollama
+        if not doc or not doc.strip():
+            print(f"  ⚠️  Jogo {game_id} ({game.get('name')}) gerou documento vazio, pulando.")
+            falhas += 1
+            continue
 
-    collection.upsert(
-        ids=ids,
-        documents=documents,
-        metadatas=metadatas,
-    )
+        try:
+            collection.upsert(
+                ids=[game_id],
+                documents=[doc],
+                metadatas=[meta],
+            )
+            sucesso += 1
+        except Exception as e:
+            print(f"  ❌ Erro ao inserir jogo {game_id} ({game.get('name')}): {e}")
+            falhas += 1
+
+    if falhas:
+        print(f"  ⚠️  {falhas} jogos pulados/com erro neste lote.")
 
 
 # ─────────────────────────────────────────────
