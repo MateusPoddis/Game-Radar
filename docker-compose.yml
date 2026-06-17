@@ -42,7 +42,7 @@ services:
     networks:
       - gamedar-network
     volumes:
-      - ./ia:/app # Hot-reload durante desenvolvimento
+      - ./modulo-ia:/app # Hot-reload durante desenvolvimento
 
   # 4. API Gateway (Ponte com o Frontend)
   api-gateway:
